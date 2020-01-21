@@ -149,7 +149,7 @@ func (p *ImageTagTransformerPlugin) findContainers(obj map[string]interface{}) e
 
 func isImageMatched(s, t string) bool {
 	// Tag values are limited to [a-zA-Z0-9_.-].
-	pattern, _ := regexp.Compile("^" + t + "(@sha256)?(:[a-zA-Z0-9_.-]*)?$")
+	pattern, _ := regexp.Compile("^" + t + "(@sha256)?(:[a-zA-Z0-9_.-{}]*)?$")
 	return pattern.MatchString(s)
 }
 
