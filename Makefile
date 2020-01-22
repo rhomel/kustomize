@@ -7,6 +7,24 @@ MYGOBIN := $(shell go env GOPATH)/bin
 SHELL := /bin/bash
 export PATH := $(MYGOBIN):$(PATH)
 
+### Temporary addition to build dist
+GIT_SHORT_HASH=$(shell git rev-parse --short HEAD)
+.PHONY:
+build-dist: $(MYGOBIN)/mdrip
+	( \
+		set -e; \
+		/bin/rm -f $(MYGOBIN)/kustomize; \
+		echo "Installing kustomize from latest."; \
+		GO111MODULE=on go install sigs.k8s.io/kustomize/kustomize/v3; \
+		./hack/testExamplesAgainstKustomize.sh latest; \
+		echo "Building kustomize /dist from HEAD."; \
+		cd kustomize; \
+		mkdir -p dist; \
+		GOOS=darwin GOARCH=amd64 go build -o dist/kustomize_$(GIT_SHORT_HASH)_darwin_amd64 .; \
+		GOOS=linux GOARCH=amd64 go build -o dist/kustomize_$(GIT_SHORT_HASH)_linux_amd64 .; \
+		find dist -name 'kustomize*' | xargs shasum -a 256 > dist/sha256_$(GIT_SHORT_HASH).txt; \
+	)
+
 .PHONY: all
 all: verify-kustomize
 
